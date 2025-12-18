@@ -43,7 +43,10 @@ app_license = "agpl-3.0"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+	"Sales Invoice": "public/js/sales_invoice.js",
+	"Delivery Note": "public/js/delivery_note.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -137,13 +140,32 @@ app_license = "agpl-3.0"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+# Document Events
+# ---------------
+# Hook on document methods and events
+
+doc_events = {
+	"Purchase Receipt": {
+		"on_submit": "shiva_erp.stock_logic.update_weight_ledger",
+		"on_cancel": "shiva_erp.stock_logic.reverse_weight_ledger",
+	},
+	"Delivery Note": {
+		"on_submit": [
+			"shiva_erp.stock_logic.update_weight_ledger",
+			"shiva_erp.sales_integration.delivery_note_on_submit",
+		],
+		"on_cancel": [
+			"shiva_erp.stock_logic.reverse_weight_ledger",
+			"shiva_erp.sales_integration.delivery_note_on_cancel",
+		],
+		"validate": "shiva_erp.sales_integration.delivery_note_validate",
+	},
+	"Sales Invoice": {
+		"on_submit": "shiva_erp.sales_integration.sales_invoice_on_submit",
+		"on_cancel": "shiva_erp.sales_integration.sales_invoice_on_cancel",
+		"validate": "shiva_erp.sales_integration.sales_invoice_validate",
+	},
+}
 
 # Scheduled Tasks
 # ---------------
@@ -241,4 +263,3 @@ app_license = "agpl-3.0"
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-
